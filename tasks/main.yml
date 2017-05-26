@@ -1,0 +1,46 @@
+---
+# tasks file for 7zip
+- name: create directory on localhost
+  file:
+    path: /tmp/ansible
+    state: directory
+  delegate_to: localhost 
+
+- name: download 7zip from url
+  get_url:
+    url: http://7-zip.org/a/7z1604-x64.msi
+    dest: /tmp/ansible
+  delegate_to: localhost
+
+- name: create directory
+  win_file:
+    path: C:\ansible
+    state: directory
+
+- name: copy 7zip from localhost to windows server
+  win_copy:
+    src: /tmp/ansible/7z1604-x64.msi
+    dest: C:\ansible\7z1604-x64.msi
+
+- name: install 7 zip
+  win_msi:
+    path: 'C:\ansible\7z1604-x64.msi'
+    state: present
+  when: not sevenzip_uninstall
+
+- name: uninstall 7 zip
+  win_msi:
+    path: 'C:\ansible\7z1604-x64.msi'
+    state: absent 
+  when: sevenzip_uninstall
+
+- name: remove 7zip install folder
+  win_file:
+    path: C:\ansible
+    state: absent 
+
+- name: remove 7zip temp destination
+  file:
+    path: /tmp/ansible
+    state: absent
+  delegate_to: localhost
